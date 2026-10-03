@@ -17,6 +17,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Unpack sources
+        run: |
+          if [ -f src.zip ]; then unzip -o src.zip; fi
+          if [ -f gradle.zip ]; then unzip -o gradle.zip; fi
+          ls -la
+          find src -type f 2>/dev/null || echo "src not found!"
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -25,8 +32,14 @@ jobs:
       - name: Build with Gradle
         run: gradle build --no-daemon
 
+      - name: Show jar contents
+        run: |
+          ls -la build/libs/
+          unzip -l build/libs/aetherclient-*.jar | head -50
+
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: aetherclient-jar
-          path: build/libs/*.jar
+          name: aetherclient
+          path: build/libs/aetherclient-*.jar
+          if-no-files-found: error
